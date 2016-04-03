@@ -21,5 +21,6 @@ SECwin is a windows service and user interface integrating [SEC (Simple Event Co
 - System tray icon with service interaction.
  
 ###Screen shots
-<img src="https://a.fsdn.com/con/app/proj/secwin/screenshots/SECwin_ConfigTab.PNG/182/137">
-<img src="https://a.fsdn.com/con/app/proj/secwin/screenshots/SECwin_Tab1.PNG/182/137">
+<img src="https://a.fsdn.com/con/app/proj/secwin/screenshots/SECwin_ConfigTab.PNG">
+
+<img src="https://a.fsdn.com/con/app/proj/secwin/screenshots/SECwin_Tab1.PNG">
