@@ -1,0 +1,50 @@
+1.2.1400
+=========
+- Change update server to GitHub.com
+- Added self installer, allows using single PE; assuming Perl preinstalled
+- SECwin server update capability of updating PE only.
+- Included Notepad++ syntax-highlighter for (SEC & nxLog); see Utilities folder
+
+
+1.2.1300
+=========
+- Fixed an issue prevents auto-update by SECwin service
+- New button "Log Perl process info", shows info on UI
+- Updated packed cygwin perl to 5.22.1 with cpan
+- Updated SEC package to 2.7.9
+- code enhancements
+
+
+1.2.1200
+=========
+- Added update functionality for SECwin & SEC
+- Code enhancement
+- Fixed UI consmetic issues
+- Upgraded SEC package version to (2.7.8)
+- Changed --keepopen default value as in sec-2.7.8
+- Added logs viewer (SEC log, SEC dump & SECwin log)
+- Ability to dump SEC perl process statistics to Windows log
+- Added "Send signal" to systray icon
+- Added more cygwin binaries
+- Debug output to console (SECwin.exe /console) only UI & update processes
+- Allow debugger attach on execution (SECwin.exe /debug)
+- More information on usage (SECwin.exe /?)
+
+
+1.1.8300
+=========
+- Code enhancement
+- Fixed UI consmetic issues
+- Upgraded SEC package version to (2.7.8)
+- Respect --keepopen by default in sec-2.7.8
+- Added more cygwin binaries
+
+
+1.1.8250
+=========
+- Fixed msi upgrade issues
+
+
+1.1.8200
+=========
+- First GA release
