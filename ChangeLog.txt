@@ -1,3 +1,12 @@
+1.2.1450
+=========
+- [#2]Fixed issue to capture orphaned perl process from failed hook
+- [#3]Fixed race condition when SEC daemon registered pid after file parsing, caused failed hooking
+- Code enhancement for (update feature)
+- Added SECwin service watchdog, with UI configuration option
+- Fixed Cosmetic issue in UI, error message in logviewer window 
+
+
 1.2.1400
 =========
 - Change update server to GitHub.com
