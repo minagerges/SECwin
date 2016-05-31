@@ -1,0 +1,107 @@
+
+rem=Windown Event Logs Dispatcher
+
+type=jump
+ptype=perlfunc
+pattern=sub {	my(%hash); my($line) = $_[0]; \ 
+				if ( $line !~ /Channel="Microsoft-Windows-Sysmon/) { return 0; } \
+				@array = $line =~ /\[NXLOG@\d+\s(.*)\](.*)/; $input = $array[0]; \
+				@pairs = split('" ', $input); \
+				foreach my $item(@pairs) { \
+				  my ($i,$j)= split('="', $item); \
+				  $hash{$i} = $j;} \
+				$hash{"Message"} = $array[1]; \
+				return \%hash;\
+			} 
+varmap=Sysmon_ht
+desc=Parse Sysmon events to hashtable
+cfset=SYSMON
+
+rem=SecurityAudit
+type=jump
+ptype=perlfunc3
+pattern=sub {	my(%hash); my($line) = $_[0]; \ 
+				if ( $line !~ /Channel="Security"/ ) { return 0; } \
+				if ( $line !~ /EventID="4663"/ ) { return 0; } \
+				$line  = $_[0].$_[2]; \
+				@array = $line =~ /\[NXLOG@\d+\s(.*)\](.*)/; $input = $array[0]; \
+				@pairs = split('" ', $input); \
+				foreach my $item(@pairs) { \
+				  my ($i,$j)= split('="', $item); \
+				  $hash{$i} = $j;} \
+				$hash{"Message"} = $array[1]; \
+				return \%hash;\
+			} 
+varmap=SecurityAudit_ht
+desc=Parse SecurityAudit 4663 events to hashtable
+cfset=SECURITYAUDIT
+
+type=jump
+ptype=perlfunc19
+pattern=sub {	my(%hash); my($line) = $_[0]; \ 
+				if ( $line !~ /Channel="Security"/ ) { return 0; } \
+				if ( $line !~ /EventID="4656"/ ) { return 0; } \
+				$line  = $_[0].$_[18]; \
+				@array = $line =~ /\[NXLOG@\d+\s(.*)\](.*)/; $input = $array[0]; \
+				@pairs = split('" ', $input); \
+				foreach my $item(@pairs) { \
+				  my ($i,$j)= split('="', $item); \
+				  $hash{$i} = $j;} \
+				$hash{"Message"} = $array[1]; \
+				return \%hash;\
+			}
+varmap=SecurityAudit_ht
+desc=Parse SecurityAudit 4656 events to hashtable
+cfset=SECURITYAUDIT
+
+rem=Other SecurityAudit
+type=jump
+ptype=perlfunc
+pattern=sub {	my(%hash); my($line) = $_[0]; \ 
+				if ( $line !~ /Channel="Security"/ ) { return 0; } \
+				@array = $line =~ /\[NXLOG@\d+\s(.*)\](.*)/; $input = $array[0]; \
+				@pairs = split('" ', $input); \
+				foreach my $item(@pairs) { \
+				  my ($i,$j)= split('="', $item); \
+				  $hash{$i} = $j;} \
+				$hash{"Message"} = $array[1]; \
+				return \%hash;\
+			}
+varmap=SecurityAudit_ht
+desc=Parse SecurityAudit Other events to hashtable
+cfset=SECURITYAUDIT
+
+
+rem=Application
+type=jump
+ptype=perlfunc
+pattern=sub {	my(%hash); my($line) = $_[0]; \ 
+				if ( $line !~ /Channel="Application"/) { return 0; } \
+				@array = $line =~ /\[NXLOG@\d+\s(.*)\](.*)/; $input = $array[0]; \
+				@pairs = split('" ', $input); \
+				foreach my $item(@pairs) { \
+				  my ($i,$j)= split('="', $item); \
+				  $hash{$i} = $j;} \
+				$hash{"Message"} = $array[1]; \
+				return \%hash;\
+			} 
+varmap=Application_ht
+desc=Parse Application events to hashtable
+cfset=APPLICATION
+
+rem=Other, mind multiline events and perlfuncN
+type=jump
+ptype=perlfunc
+pattern=sub {	my(%hash); my($line) = $_[0]; \ 
+				if ( $line !~ /Channel=".*"/) { return 0; } \
+				@array = $line =~ /\[NXLOG@\d+\s(.*)\](.*)/; $input = $array[0]; \
+				@pairs = split('" ', $input); \
+				foreach my $item(@pairs) { \
+				  my ($i,$j)= split('="', $item); \
+				  $hash{$i} = $j;} \
+				$hash{"Message"} = $array[1]; \
+				return \%hash;\
+			} 
+varmap=WinEvtOther_ht
+desc=Parse other Win events to hashtable
+cfset=WINEVTOTHER
