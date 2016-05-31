@@ -1,0 +1,29 @@
+
+type=Options 
+procallin=no 
+joincfset=SIGCHECK
+
+
+type=single
+ptype=cached
+pattern=SigCheck_VThashtable
+context=SigCheck_VThashtable:>( sub { return exists($_[0]->{"Verified"}) ; } ) 
+desc=SigCheck result: process image is [$+{Verified}] image:[$+{Path}] VirusTotal_detection:[$+{VT_detection}] VirusTotal_link:[$+{VT_link}]
+continue=takenext
+action=logonly
+
+
+type=single
+ptype=cached
+pattern=SigCheck_VThashtable
+context=SigCheck_VThashtable:>( sub {  @array = $_[0]->{"VT_detection"} =~ /(\d+)\|(\d+)/ ; return $array[0] > 0 } ) 
+desc=<<Known malware detected by VirusTotal>> process image is [$+{Verified}] image:[$+{Path}] VirusTotal_detection:[$+{VT_detection}] VirusTotal_link:[$+{VT_link}]
+action=logonly
+
+rem=rerun Sigcheck to get result after 5 minutes
+type=single
+ptype=cached
+pattern=SigCheck_VThashtable
+context=SigCheck_VThashtable:>( sub { return $_[0]->{"Verified"} eq "Submitted" ; } ) 
+desc=>>Submitted [$+{Verified}] file to VirusTotal image:$+{Path} VirusTotal_detection:$+{VT_detection} VirusTotal_link:$+{VT_link}
+action=logonly;  delete SCANNED_$+{Path}; cspawn FileSigChecked ping 127.0.0.1 -n 300 > nul && sigcheck -q -c -vs "$+{Path}" 

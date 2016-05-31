@@ -1,0 +1,80 @@
+
+type=Options 
+procallin=no 
+joincfset=SYSMON
+
+
+type=single
+ptype=cached
+pattern=Sysmon_ht
+context=Sysmon_ht:>( sub { return $_[0]->{"EventID"} eq "1" ; } ) 
+desc=Process Created by [$+{User}] image:$+{Image} parentImage:$+{ParentImage}
+action=logonly; \
+		create PROCESS_$+{Hashes} 1 ;\
+		event ProcessStarted_Image=[$+{Image}]_Hash=[$+{Hashes}]_Parent=[$+{ParentImage}]  $+{_inputsrc}
+
+type=single
+ptype=cached
+pattern=Sysmon_ht
+context=Sysmon_ht:>( sub { return $_[0]->{"EventID"} eq "2" ; } ) 
+desc=Process Changed file creation tTimeStamp image:$+{Image} parentImage:$+{ParentImage} Hash:[$+{Hashes}]
+action=logonly; \
+		create PROCESS_$+{Hashes} 1 ;\
+		event ProcessChanged-File-tTimeStamp_Image=[$+{Image}]_Hash=[$+{Hashes}]_FILE=[$+{File}]
+
+type=single
+ptype=cached
+pattern=Sysmon_ht
+context=Sysmon_ht:>( sub { return $_[0]->{"EventID"} eq "3" && $_[0]->{"ProcessId"} ne "4" ; } ) 
+desc=NetworkConnectionActivity by [$+{User}] image:$+{Image} SRCIP=[$+{SourceIp}] DSTIP=[$+{DestinationIp}] DSTport=[$+{DestinationPort}] DSTportName=[$+{DestinationPortName}]
+action=event NetworkConnectionActivity_Image=[$+{Image}]_IsInitiated=[$+{Initiated}]_Protocol=[$+{Protocol}]_SRCIP=[$+{SourceIp}]_DSTIP=[$+{DestinationIp}]_DSTport=[$+{DestinationPort}]_DSTportName=[$+{DestinationPortName}]
+
+type=single
+ptype=cached
+pattern=Sysmon_ht
+context=Sysmon_ht:>( sub { return $_[0]->{"EventID"} eq "4"; } ) 
+desc= <<URGENT>> Sysmon service state changed State:[$+{State}]
+action=logonly; create SYSMON_SERVICE_STATE 2; event SysmonService_StatusChanged_$+{State} 
+
+type=single
+ptype=cached
+pattern=Sysmon_ht
+context=Sysmon_ht:>( sub { return $_[0]->{"EventID"} eq "5" ; } ) 
+desc=Process Terminated image:[$+{Image}] processID:[$+{ProcessId}] UtcTime:[$+{UtcTime}]
+action=logonly;
+
+type=single
+ptype=cached
+pattern=Sysmon_ht
+context=Sysmon_ht:>( sub { return $_[0]->{"EventID"} eq "6" ; } ) 
+desc=Driver loaded ImageLoaded:$+{ImageLoaded} Signed:$+{Signed} Signature:$+{Signature} HashType$+{HashType} Hash:$+{Hash}
+action=logonly; create DriverLoaded_$+{Hash} 1; event Driver_Loaded_Signed=[$+{Signed}]_ImageLoaded=[$+{ImageLoaded}]_Hash=[$+{Hash}]
+
+type=single
+ptype=cached
+pattern=Sysmon_ht
+context=Sysmon_ht:>( sub { return $_[0]->{"EventID"} eq "7" ; } ) 
+desc=Image Loaded Image:[$+{Image}] Hash:[$+{Hashes}] ImageLoaded:[$+{ImageLoaded}] Signed;[$+{Signed}]
+action=create PROCESS_$+{Hashes} 1 ;\
+		event ImageLoaded_Image=[$+{Image}]_Hash=[$+{Hashes}]_ImageLoaded=[$+{ImageLoaded}]_Signed=[$+{Signed}]
+
+type=single
+ptype=cached
+pattern=Sysmon_ht
+context=Sysmon_ht:>( sub { return $_[0]->{"EventID"} eq "8" ; } ) 
+desc=<<Suspeciouse activity>> Created Remote Thread SourceImage:$+{SourceImage} id:$+{SourceProcessId} TargetImage:$+{TargetImage} id:$+{TargetProcessId} ThreadID:$+{NewThreadId} Function:$+{StartFunction}
+action=logonly;
+
+type=single
+ptype=cached
+pattern=Sysmon_ht
+context=Sysmon_ht:>( sub { return $_[0]->{"EventID"} eq "9" ; } ) 
+desc=Raw Disk Access Read image:[$+{Image}] PID=[$+{ProcessId}] Device=[$+{Device}]
+action=event RawAccessRead_Image=[$+{Image}]_PID=[$+{ProcessId}]_Device=[$+{Device}]
+
+type=single
+ptype=cached
+pattern=Sysmon_ht
+context=Sysmon_ht:>( sub { return $_[0]->{"EventID"} eq "255" ; } ) 
+desc=<<Critical>> Sysmon ERROR id:$+{ID} Description:[$+{Description}]
+action=logonly;

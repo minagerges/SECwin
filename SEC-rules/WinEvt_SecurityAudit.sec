@@ -1,0 +1,101 @@
+
+type=Options 
+procallin=no 
+joincfset=SECURITYAUDIT
+rem=Detailed event information https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?eventID=0000
+
+type=single
+ptype=cached
+pattern=SecurityAudit_ht
+context=SecurityAudit_ht:>( sub { return $_[0]->{"EventID"} eq "1006" ; } ) 
+desc=<<EXTREMELY URGENT>> Malware Detected by Win_Defender
+action=logonly; event WinDefenderMalwareDetected
+
+type=single
+ptype=cached
+pattern=SecurityAudit_ht
+context=SecurityAudit_ht:>( sub { return $_[0]->{"EventID"} eq "1008" ; } ) 
+desc=<<EXTREMELY URGENT>> anActionon Malware failed by Win_Defender
+action=logonly; event WinDefenderActionFailed
+
+type=single
+ptype=cached
+pattern=SecurityAudit_ht
+context=SecurityAudit_ht:>( sub { return $_[0]->{"EventID"} eq "1102" ; } ) 
+desc=<<EXTREMELY URGENT>> EventLog cleared by User:[$+{SecurityID}]
+action=logonly; event WINEVT_AUDIT_LOG_CLEARED_User=[$+{SecurityID}]
+
+type=single
+ptype=cached
+pattern=SecurityAudit_ht
+context=SecurityAudit_ht:>( sub { return $_[0]->{"EventID"} eq "1104" ; } ) 
+desc=<<EXTREMELY URGENT>> EventLog is full
+action=logonly; event WINEVT_AUDIT_LOG_Full
+
+type=single
+ptype=cached
+pattern=SecurityAudit_ht
+context=SecurityAudit_ht:>( sub { return $_[0]->{"EventID"} eq "4624" ; } ) 
+desc=An account was successfully logged on 
+action=logonly; create SuccessfulLogon_$+{LogonID} ; event SuccessfulLogon_User=[$+{SecurityID}]_LogonID=[$+{LogonID}]_LogonType=[$+{LogonType}]_ProcessName=[$+{ProcessName}]_SourceIP=[$+{SourceNetworkAddress}]
+
+type=single
+ptype=cached
+pattern=SecurityAudit_ht
+context=SecurityAudit_ht:>( sub { return $_[0]->{"EventID"} eq "4648" ; } ) 
+desc=A logon was attempted using explicit credentials by User:$+{SecurityID}
+action=none; Create EXPLICIT_LOGON_ID_$+{LogonID} ; event ExplicitLogon_Process=[$+{ProcessName}]_User=[$+{SecurityID}]_Credentials=[{$+{AccountDomain}\$+{AccountName}}]_TargetServer=[$+{TargetServerName}]
+
+type=single
+ptype=cached
+pattern=SecurityAudit_ht
+context=SecurityAudit_ht:>( sub { return $_[0]->{"EventID"} eq "4656" ; } ) 
+desc=A handle to an object was requested: ProcessName:[$+{ProcessName}] ObjectName:[$+{ObjectName}] User:[$+{SecurityID}] Message:[$+{Message}]
+action=logonly;
+
+rem=correlated with 4663 to define object name based on HandleID >>>>NOT DONE YET
+type=single
+ptype=cached
+pattern=SecurityAudit_ht
+context=SecurityAudit_ht:>( sub { return $_[0]->{"EventID"} eq "4660" ; } ) 
+desc=An object was deleted object: ProcessName:[$+{ProcessName}] ObjectName:[$+{ObjectName}] User:[$+{SecurityID}] Message:[$+{Message}]
+action=logonly; create ObjectDeleted_$+{HandleID} ; event ObjectDeleted_HandleID=[$+{HandleID}]_ProcessName=[$+{ProcessName}]_User=[$+{SecurityID}]
+
+type=single
+ptype=cached
+pattern=SecurityAudit_ht
+context=SecurityAudit_ht:>( sub { return $_[0]->{"EventID"} eq "4663" ; } ) 
+desc=An attempt was made to access an object: ProcessName:[$+{ProcessName}] ObjectName:[$+{ObjectName}] User:[$+{SecurityID}] Message:[$+{Message}]
+action=logonly; create ObjectAccess_$+{HandleID}; event ObjectAccess_HandleID=[$+{HandleID}]_ProcessName=[$+{ProcessName}]_ObjectName=[$+{ObjectName}]_User=[$+{SecurityID}]
+rem=event AccessesObject_4463_ProcessName=[$+{ProcessName}]_ObjectName=[$+{ObjectName}]_User=$+{SecurityID}_Message=[$+{Message}]
+continue=takenext
+
+type=single
+ptype=cached
+pattern=SecurityAudit_ht
+context=SecurityAudit_ht:>( sub { return ($_[0]->{"EventID"} eq "4663" && $_[0]->{"Message"} =~ /Accesses\:\tWriteData.*AddFile/ ) ; } ) 
+desc= <<WRITEDATA>> An attempt was made to access an object: ProcessName:[$+{ProcessName}] ObjectName:[$+{ObjectName}] User:[$+{SecurityID}] Message:[$+{Message}]
+action=logonly; event ObjectAccess_WriteData_HandleID=[$+{HandleID}]_ProcessName=[$+{ProcessName}]_ObjectName=[$+{ObjectName}]_User=[$+{SecurityID}] ;\
+		delete SCANNED_$+{ObjectName}
+
+rem=Correlated with 4624:An account was successfully logged on 
+type=single
+ptype=cached
+pattern=SecurityAudit_ht
+context=SecurityAudit_ht:>( sub { return $_[0]->{"EventID"} eq "4672" ; } ) 
+desc=<<Privileges Escalation>> Special privileges assigned to new logon: User:[$+{SecurityID}] Message:[$+{Message}]
+action=logonly; create PrivilegesEscalation_$+{LogonID} ; event PrivilegesEscalation_User=[$+{SecurityID}]_LogonID=[$+{LogonID}]
+
+type=single
+ptype=cached
+pattern=SecurityAudit_ht
+context=SecurityAudit_ht:>( sub { return $_[0]->{"EventID"} eq "4719" ; } ) 
+desc=Audit Policy Changed: Category:$+{Category} Subcategory:$+{Subcategory} Changes:$+{Changes}
+action=logonly;
+
+type=single
+ptype=cached
+pattern=SecurityAudit_ht
+context=SecurityAudit_ht:>( sub { return ($_[0]->{"EventID"} eq "5140" && $_[0]->{"EventID"} !~ /\\IPC\$/ ); } ) 
+desc=<<SUSPICIOUSE ACTIVITY>> Network share has been accessed
+action=logonly; Create  NetworkShareAccessed_SourceIP_$+{SourceAddress} ; event NetworkShareAccessed_SourceIP=[$+{SourceAddress}]_User=[$+{SecurityID}]_Share=[$+{ShareName}]

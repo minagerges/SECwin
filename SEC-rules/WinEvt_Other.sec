@@ -1,0 +1,18 @@
+
+type=Options 
+procallin=no 
+joincfset=WINEVTOTHER
+
+type=single
+ptype=cached
+pattern=WinEvtOther_ht
+context=WinEvtOther_ht:>( sub { return $_[0]->{"EventType"} eq "Error" ; } ) 
+desc=<<Critical>> WinEvt Error Channel:[$+{Channel}] EventID:$+{EventID} Source:[$+{Source}] Message:[$+{Message}]
+action=logonly;
+
+type=single
+ptype=cached
+pattern=WinEvtOther_ht
+context=WinEvtOther_ht:>( sub { return $_[0]->{"EventType"} eq "Warning" ; } ) 
+desc=<<Warning>> WinEvt Warning Channel:[$+{Channel}] EventID:$+{EventID} Source:[$+{Source}] Message:[$+{Message}]
+action=logonly;

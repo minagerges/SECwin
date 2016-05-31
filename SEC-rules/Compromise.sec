@@ -1,0 +1,67 @@
+
+rem=Monitor Sysmon service for stopped status
+type=single
+ptype=RegExp
+pattern=SysmonService_StatusChanged_Stopped
+context=SYSMON_SERVICE_STATE
+desc=<<Suspeciouse incident>> Sysmon Service Stopped, will be started again
+action=logonly; cspawn STARTING_SYSMON net start Sysmon
+continue=takenext
+
+type=PairWithWindow 
+ptype=RegExp 
+pattern=SysmonService_StatusChanged_Stopped
+context=SYSMON_SERVICE_STATE
+desc=<<EXTREMELY URGENT>> Sysmon service stopped and failed to start again within 30 seconds
+action=logonly;
+ptype2=RegExp 
+pattern2=The Sysmon service was started successfully
+context2=STARTING_SYSMON
+desc2=Sysmon service was restarted by correlation engine after it was stopped
+action2=logonly 
+window=30
+
+rem=NetworkShareAccessed
+type=single
+ptype=RegExp
+pattern=NetworkShareAccessed_SourceIP=\[(.*)\]_User=\[(.*\\localadmin)\]_Share=\[(.*)\]
+context=NetworkShareAccessed_SourceIP_$1
+desc=<<VERY Suspeciouse incident>> Network share access by local admin from IP:$1 user:$2 on share:$3
+action=logonly;
+continue=takenext
+
+type=single
+ptype=RegExp
+pattern=NetworkShareAccessed_SourceIP=\[(.*)\]_User=\[(.*)\]_Share=\[(.*\$)\]
+context=NetworkShareAccessed_SourceIP_$1
+desc=<<VERY Suspeciouse incident>> Network share access to a hidden share from IP:$1 user:$2 on share:$3
+action=logonly;
+
+rem=Privileges Escalation
+type=Pair 
+ptype=RegExp 
+pattern=SuccessfulLogon_User=\[(.*)\]_LogonID=\[(.*)\]_LogonType=\[(.*)\]_ProcessName=\[(.*)\]_SourceIP=\[(.*)\]
+context=SuccessfulLogon_$2
+desc=Successfull Logon for user $1
+action=none
+ptype2=RegExp
+pattern2=PrivilegesEscalation_User=[$+{SecurityID}]_LogonID=[$+{LogonID}]
+context2=PrivilegesEscalation_$2
+desc2=<<Attention required>> Privileges Escalation by user:[$1] processName:%4 SourceIP:%5 
+action2=logonly 
+window=0
+
+rem=Deleted Object
+type=Pair 
+ptype=RegExp 
+pattern=ObjectAccess_HandleID=\[(.*)\]_ProcessName=\[(.*)\]_ObjectName=\[(.*)\]_User=\[(.*)\]
+context=ObjectAccess_$1
+desc=ObjectAccess object:[$3] ProcessName:[$2] User:[$4]
+continue=takenext
+action=none
+ptype2=RegExp
+pattern2=ObjectDeleted_HandleID=\[(.*)\]_ProcessName=\[(.*)\]_User=\[(.*)\]
+context2=ObjectDeleted_$1
+desc2=<<Attention required>> Objected was deleted ObjectName:[%3] ProcessName:[$2] user[$3]
+action2=logonly;
+window=0

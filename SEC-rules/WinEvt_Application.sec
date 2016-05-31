@@ -1,0 +1,18 @@
+
+type=Options 
+procallin=no 
+joincfset=APPLICATION
+
+type=single
+ptype=cached
+pattern=Application_ht
+context=Application_ht:>( sub { return $_[0]->{"EventType"} eq "Error" ; } ) 
+desc=<<Critical>> WinEvt Application Error EventID:$+{EventID} Source:$+{Source} Message:$+{Message}
+action=logonly;
+
+type=single
+ptype=cached
+pattern=Application_ht
+context=Application_ht:>( sub { return $_[0]->{"EventType"} eq "Warning" ; } ) 
+desc=<<Warning>> WinEvt Application Warning EventID:$+{EventID} Source:$+{Source} Message:$+{Message}
+action=logonly;
