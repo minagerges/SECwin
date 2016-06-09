@@ -1,3 +1,9 @@
+1.2.1460
+=========
+- Hot-Fix for failed update
+- Update code enhancements
+
+
 1.2.1450
 =========
 - [#2]Fixed issue to capture orphaned perl process from failed hook
